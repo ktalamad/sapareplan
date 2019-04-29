@@ -1,0 +1,59 @@
+<project name="SapaReplan" default="all">
+	<description>
+		Builds Sapa2.
+	</description>
+	<!-- indicate where the build classes will go -->
+	<property name="build" location="${basedir}${file.separator}bin"/>
+	<property name="src" location="${basedir}${file.separator}src"/>
+	<property name="javacchome" location="${basedir}${file.separator}lib"/>
+
+	<target name="all">
+	</target>
+
+	<!-- perform javacc step (usually only necessary if the grammar changes) -->
+	<target name="compile_pddl_compiler">
+		<echo message="Performing javacc compilation on parser."/>
+		<javacc
+			target="src/edu/asu/sapa/parsing/PDDL21Parser.jj" 
+			javacchome="${javacchome}"
+			outputdirectory="src/edu/asu/sapa/parsing"
+			lookahead="3"
+			/>
+	</target>
+	
+	<!-- perform compile all classes and put the .class files in the build directory -->
+	<target name="compile" depends="compile_pddl_compiler">
+		<echo message="building soruce in ${src}"/>
+		<javac srcdir="${src}" destdir="${build}"/>
+	</target>
+	
+	<target name="src_build">
+		<tstamp/>
+		<copy file="build.xml" todir="${src}"/>
+		<jar destfile="src_dist/${ant.project.name}-src-${DSTAMP}-${TSTAMP}.jar"
+			 basedir="${src}" 
+			 compress="true" />
+		<delete file="${src}/build.xml"/>
+	</target>
+	
+	<target name="exe_build" depends="compile">
+		<tstamp/>
+		<jar destfile="bin_dist/${ant.project.name}-${DSTAMP}-${TSTAMP}.jar"
+			 basedir="${build}"
+			 compress="true"
+			 manifest="MANIFEST.MF" />
+	</target>
+	
+	<!-- simple combination of both src_build and exe_build... intend make this more sophisticated later -->
+	<target name="make_stable_build" depends="compile">
+		<tstamp/>
+		<jar destfile="bin_dist/${ant.project.name}_stable-${DSTAMP}-${TSTAMP}.jar"
+			 basedir="${build}"
+			 excludes="CVS"
+			 compress="true" />
+		<jar destfile="src_dist/${ant.project.name}_stable-src-${DSTAMP}-${TSTAMP}.jar"
+			 basedir="${src}" 
+			 excludes="CVS"
+			 compress="true" />		
+	</target>
+</project>

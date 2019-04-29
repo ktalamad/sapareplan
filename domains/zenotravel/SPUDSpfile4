@@ -1,0 +1,125 @@
+;; seed: 42
+(define (problem ztravel-2-5) (:domain zeno-travel)
+(:objects
+plane1 plane2  - aircraft
+fl2 fl3 fl6 fl0 fl1 fl5 fl4  - flevel
+person1 person5 person3 person4 person2  - person
+city0 city2 city1  - city
+)
+
+(:init
+	(is-true)
+	(at person5 city2)
+	(at person1 city0)
+	(next fl4 fl5)
+	(at plane2 city2)
+	(fuel-level plane1 fl5)
+	(at person3 city0)
+	(next fl3 fl4)
+	(fuel-level plane2 fl0)
+	(at person4 city0)
+	(next fl2 fl3)
+	(at person2 city1)
+	(next fl1 fl2)
+	(next fl5 fl6)
+	(at plane1 city2)
+	(next fl0 fl1)
+	(= (refuel-cost plane1 city2) 6315.9985)
+	(= (fly-cost plane2 city2 city0) 5124.7837)
+	(= (fly-cost plane1 city0 city2) 2686.1558)
+	(= (fly-cost plane1 city1 city2) 1616.8822)
+	(= (refuel-cost plane2 city1) 5075.942)
+	(= (fly-cost plane2 city1 city1) 3679.4565)
+	(= (zoom-cost plane1 city1 city1) 663.2261)
+	(= (debark-cost person2 plane2) 1.9731812)
+	(= (zoom-cost plane1 city0 city1) 607.3346)
+	(= (fly-cost plane2 city0 city0) 5294.7485)
+	(= (zoom-cost plane2 city0 city0) 1114.4583)
+	(= (fly-cost plane2 city2 city2) 3220.3955)
+	(= (zoom-cost plane2 city2 city1) 738.4373)
+	(= (refuel-cost plane1 city1) 6846.5015)
+	(= (zoom-cost plane1 city2 city0) 1169.5828)
+	(= (zoom-cost plane2 city0 city2) 909.1047)
+	(= (fly-cost plane2 city2 city1) 4382.842)
+	(= (zoom-cost plane1 city0 city2) 978.8745)
+	(= (board-cost person3 plane2) 35.103157)
+	(= (board-cost person1 plane1) 115.09325)
+	(= (zoom-cost plane2 city1 city2) 826.52625)
+	(= (debark-cost person3 plane1) 1.6896567)
+	(= (zoom-cost plane2 city2 city2) 1384.633)
+	(= (debark-cost person5 plane2) 1.3919283)
+	(= (refuel-cost plane2 city0) 1736.32)
+	(= (fly-cost plane1 city2 city2) 1320.4104)
+	(= (board-cost person2 plane1) 98.86144)
+	(= (zoom-cost plane1 city1 city2) 883.79553)
+	(= (refuel-cost plane1 city0) 7764.2603)
+	(= (fly-cost plane2 city0 city1) 4207.5996)
+	(= (fly-cost plane1 city1 city0) 2189.4019)
+	(= (zoom-cost plane2 city1 city1) 1154.5923)
+	(= (fly-cost plane1 city2 city0) 4623.492)
+	(= (fly-cost plane1 city0 city0) 2743.7876)
+	(= (board-cost person5 plane2) 102.73224)
+	(= (zoom-cost plane2 city2 city0) 861.64453)
+	(= (fly-cost plane1 city0 city1) 1129.4271)
+	(= (debark-cost person4 plane2) 2.7313735)
+	(= (debark-cost person1 plane2) 1.5611439)
+	(= (zoom-cost plane2 city0 city1) 933.911)
+	(= (debark-cost person3 plane2) 1.3585469)
+	(= (board-cost person2 plane2) 66.03064)
+	(= (fly-cost plane2 city1 city0) 2273.4746)
+	(= (fly-cost plane1 city2 city1) 5891.6875)
+	(= (debark-cost person2 plane1) 1.9626559)
+	(= (fly-cost plane2 city0 city2) 2148.8408)
+	(= (board-cost person1 plane2) 66.90225)
+	(= (debark-cost person5 plane1) 2.2627594)
+	(= (board-cost person4 plane1) 25.257898)
+	(= (debark-cost person4 plane1) 2.9249737)
+	(= (fly-cost plane2 city1 city2) 6433.53)
+	(= (zoom-cost plane1 city2 city2) 1281.8721)
+	(= (board-cost person3 plane1) 23.737259)
+	(= (board-cost person4 plane2) 103.38662)
+	(= (zoom-cost plane1 city0 city0) 1093.3477)
+	(= (zoom-cost plane1 city1 city0) 1167.9333)
+	(= (zoom-cost plane2 city1 city0) 1325.1578)
+	(= (zoom-cost plane1 city2 city1) 1229.8728)
+	(= (board-cost person5 plane1) 74.89274)
+	(= (refuel-cost plane2 city2) 1434.2356)
+	(= (fly-cost plane1 city1 city1) 1465.5044)
+	(= (debark-cost person1 plane1) 2.5225024)
+)
+(:goal (and
+		({(at person4 city1) (at plane1 city0) (at person2 city2) (at person5 city2) } -5368.583)
+
+		({(at person5 city2) (at plane1 city0) (at person4 city1) (at person2 city2) } 2289.6665)
+
+		({(at person2 city2) (at person4 city1) (at plane1 city0) } 730.6909)
+
+		({(at person5 city2) (at person4 city1) (at person2 city2) (at plane1 city0) } -5955.532)
+
+		({(at person2 city2) (at person3 city0) (at person4 city1) (at plane1 city0) } -476.5962)
+
+	
+	
+		({(at person3 city0) (at plane1 city0) (at person4 city1) } 2738.7578)
+
+		({(at person5 city2) (at person3 city0) (at person4 city1) (at plane1 city0) (at person2 city2) } -2986.2656)
+
+		({(at plane1 city0) (at person2 city2) (at person4 city1) } 5458.7046)
+
+	
+		({(at plane1 city0) (at person5 city2) } -6902.547)
+
+		({(at person2 city2) (at person4 city1) (at person3 city0) (at person5 city2) (at plane1 city0) } -9558.607)
+
+		({(at person5 city2) (at person4 city1) (at person2 city2) (at person3 city0) (at plane1 city0) } 3268.0732)
+
+		({(at person4 city1) (at person2 city2) } 724.9346)
+
+	((at plane1 city0) soft 9541.229)
+	((at person2 city2) soft 13502.683)
+	((at person3 city0) soft 9960.365)
+	((at person4 city1) soft 14375.43)
+	((at person5 city2) soft 10244.735)
+	)
+)
+)

@@ -1,0 +1,68 @@
+;; seed: 42
+(define (problem ztravel-1-2) (:domain zeno-travel)
+(:objects
+plane1  - aircraft
+fl2 fl0 fl1 fl3 fl4 fl5 fl6 - flevel
+person1 person2 - person
+city0 city1 city2 - city
+)
+
+(:init
+	(is-true)
+	(next fl2 fl3)
+	(at plane1 city0)
+	(next fl1 fl2)
+	(at person1 city0)
+	(next fl4 fl5)
+	(next fl5 fl6)
+	(next fl3 fl4)
+	(at person2 city2)
+	(fuel-level plane1 fl1)
+	(next fl0 fl1)
+	(= (refuel-cost plane1 city2) 2026.8124)
+	(= (fly-cost plane1 city0 city2) 946.452)
+	(= (fly-cost plane1 city1 city2) 16571.2563)
+	(= (zoom-cost plane1 city1 city1) 1318.7552)
+	(= (zoom-cost plane1 city0 city1) 1179.26)
+	(= (fly-cost plane1 city2 city1) 457.70612)
+	(= (refuel-cost plane1 city1) 1666.016)
+	(= (debark-cost person2 plane1) 2.1748548)
+	(= (zoom-cost plane1 city2 city0) 1113.9363)
+	(= (zoom-cost plane1 city0 city2) 1276.1523)
+	(= (board-cost person1 plane1) 56.516117)
+	(= (zoom-cost plane1 city2 city2) 672.2573)
+	(= (fly-cost plane1 city2 city2) 1748.475)
+	(= (zoom-cost plane1 city1 city2) 1277.2589)
+	(= (board-cost person2 plane1) 37.22179)
+	(= (zoom-cost plane1 city0 city0) 846.7553)
+	(= (zoom-cost plane1 city1 city0) 68521.598)
+	(= (zoom-cost plane1 city2 city1) 1122.0223)
+	(= (refuel-cost plane1 city0) 761.3088)
+	(= (fly-cost plane1 city1 city0) 1158.3)
+	(= (fly-cost plane1 city2 city0) 758.53046)
+	(= (fly-cost plane1 city0 city0) 490.26913)
+	(= (fly-cost plane1 city0 city1) 1012.6718)
+	(= (fly-cost plane1 city1 city1) 1998.457)
+	(= (debark-cost person1 plane1) 1.317309)
+)
+(:goal (and
+	
+;;		({(at plane1 city1) (at person2 city2) (at person1 city0) } 2527.3804)
+
+;;		({(at person2 city2) (at person1 city0) } 2331.2383)
+
+	
+;;		({(at person2 city2) (at plane1 city1) (at person1 city0) } 4943.039)
+
+;;		({(at person2 city2) (at plane1 city1) (at person1 city0) } 1728.957)
+
+		({(at plane1 city2) (at person1 city1) (at person2 city1) } -454477.2036)
+
+	
+	
+	((at plane1 city2) soft 6935.67456)
+	((at person1 city1) soft 750.92584)
+	((at person2 city1) soft 1556.3522)
+	)
+)
+)

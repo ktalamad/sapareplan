@@ -1,0 +1,108 @@
+;; seed: 620
+(define (problem roverprob4213) (:domain rover)
+(:objects
+general  - lander
+waypoint3 waypoint0 waypoint2 waypoint1  - waypoint
+rover0store  - store
+camera0 camera1  - camera
+high_res colour low_res  - mode
+rover0  - rover
+objective0 objective1  - objective
+)
+
+(:init
+	(is-true)
+	(channel_free general)
+	(can_traverse rover0 waypoint0 waypoint1)
+	(visible waypoint1 waypoint2)
+	(supports camera0 colour)
+	(on_board camera0 rover0)
+	(can_traverse rover0 waypoint0 waypoint3)
+	(visible_from objective1 waypoint1)
+	(visible waypoint1 waypoint0)
+	(visible waypoint2 waypoint1)
+	(can_traverse rover0 waypoint0 waypoint2)
+	(visible waypoint3 waypoint1)
+	(visible waypoint1 waypoint3)
+	(at_lander general waypoint1)
+	(visible waypoint2 waypoint0)
+	(supports camera0 high_res)
+	(visible_from objective1 waypoint2)
+	(visible waypoint2 waypoint3)
+	(visible waypoint0 waypoint1)
+	(store_of rover0store rover0)
+	(can_traverse rover0 waypoint3 waypoint0)
+	(visible waypoint3 waypoint2)
+	(can_traverse rover0 waypoint1 waypoint0)
+	(calibration_target camera0 objective0)
+	(empty rover0store)
+	(supports camera1 high_res)
+	(equipped_for_rock_analysis rover0)
+	(visible waypoint0 waypoint2)
+	(can_traverse rover0 waypoint2 waypoint0)
+	(at rover0 waypoint0)
+	(calibration_target camera1 objective1)
+	(at_rock_sample waypoint0)
+	(at_soil_sample waypoint0)
+	(visible waypoint0 waypoint3)
+	(available rover0)
+	(supports camera0 low_res)
+	(visible waypoint3 waypoint0)
+	(equipped_for_soil_analysis rover0)
+	(on_board camera1 rover0)
+	(visible_from objective0 waypoint0)
+	(equipped_for_imaging rover0)
+	(visible_from objective1 waypoint0)
+	(= (navigate-cost waypoint1 waypoint0) 2259.3662)
+	(= (calibrate-cost camera0) 448.60706)
+	(= (soil-cost rover0store waypoint2) 309.07013)
+	(= (navigate-cost waypoint3 waypoint3) 0.0)
+	(= (navigate-cost waypoint0 waypoint0) 0.0)
+	(= (rock-cost rover0store waypoint1) 513.4713)
+	(= (soil-comm-cost rover0) 231.2598)
+	(= (soil-cost rover0store waypoint0) 176.86217)
+	(= (navigate-cost waypoint3 waypoint1) 1491.4364)
+	(= (rock-cost rover0store waypoint3) 518.0907)
+	(= (navigate-cost waypoint2 waypoint2) 0.0)
+	(= (rock-cost rover0store waypoint2) 768.57104)
+	(= (image-comm-cost rover0) 586.28516)
+	(= (navigate-cost waypoint3 waypoint0) 1916.7412)
+	(= (navigate-cost waypoint2 waypoint0) 2120.7358)
+	(= (navigate-cost waypoint2 waypoint3) 1308.0056)
+	(= (navigate-cost waypoint1 waypoint1) 0.0)
+	(= (rock-comm-cost rover0) 419.23337)
+	(= (soil-cost rover0store waypoint1) 367.18497)
+	(= (navigate-cost waypoint2 waypoint1) 2198.625)
+	(= (navigate-cost waypoint0 waypoint3) 1573.8435)
+	(= (navigate-cost waypoint3 waypoint2) 2342.57)
+	(= (navigate-cost waypoint0 waypoint2) 1464.3452)
+	(= (rock-cost rover0store waypoint0) 407.31635)
+	(= (drop-cost rover0store) 167.35274)
+	(= (navigate-cost waypoint1 waypoint3) 1312.8381)
+	(= (soil-cost rover0store waypoint3) 176.87305)
+	(= (image-cost camera0) 254.05743)
+	(= (image-cost camera1) 632.0293)
+	(= (calibrate-cost camera1) 651.02594)
+	(= (navigate-cost waypoint0 waypoint1) 2221.6025)
+	(= (navigate-cost waypoint1 waypoint2) 2747.867)
+)
+(:goal (and
+	
+	
+	
+		({(communicated_rock_data waypoint0) (communicated_image_data objective1 low_res) (communicated_soil_data waypoint0) } -3024.9736)
+
+		({(communicated_rock_data waypoint0) (communicated_soil_data waypoint0) (communicated_image_data objective1 low_res) } 2352.1062)
+
+		({(communicated_soil_data waypoint0) (communicated_rock_data waypoint0) } 5250.1113)
+
+	
+		({(communicated_rock_data waypoint0) (communicated_soil_data waypoint0) (communicated_image_data objective1 low_res) } -4781.583)
+
+	
+	((communicated_soil_data waypoint0) soft 15784.827)
+	((communicated_rock_data waypoint0) soft 16289.305)
+	((communicated_image_data objective1 low_res) soft 13281.189)
+	)
+)
+)
