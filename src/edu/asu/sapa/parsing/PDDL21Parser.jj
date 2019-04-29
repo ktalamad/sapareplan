@@ -1,0 +1,812 @@
+/***********************************************************
+   PDDL2.1 Java Parser (Using JavaCC Syntax)
+   Author: Minh B. Do - Arizona State University
+***********************************************************/
+
+options {
+    IGNORE_CASE = true;
+    DEBUG_PARSER = false;
+    LOOKAHEAD = 3;
+    FORCE_LA_CHECK = true;
+}
+
+/*********************************************************/
+PARSER_BEGIN(PDDL21Parser)
+
+package edu.asu.sapa.parsing;
+
+import edu.asu.sapa.lifted.*;
+import edu.asu.sapa.ground.GoalDep;
+import edu.asu.sapa.muri.*;
+
+import java.util.*;
+
+public class PDDL21Parser {
+	public static ProblemFacade prob=new ProblemFacade();
+	public static Action act;
+	public static Scope scope;
+} 
+
+PARSER_END(PDDL21Parser)
+/***********************************************************/
+
+<DEFAULT, Requirement> SKIP : /* White space and NewLine */
+{
+    " "
+|   "\t"
+|   "\n"
+|   "\r"
+|   "\f"
+}
+
+<DEFAULT, Requirement> SPECIAL_TOKEN: /* Comments */
+{
+    <SINGLE_LINE_COMMENT: ";;" (~["\n", "\r"])* ("\n" | "\r" | "\r\n")>
+}
+
+
+<DEFAULT> TOKEN: /* Reserved Words and Literals */
+{
+    <DEFINE: "define">
+		 |   <DOMAIN: "domain">
+		 |   <FUNCTION: ":functions">
+		 |   <REQUIREMENTS: ":requirements"> : Requirement
+		 |   <TYPES: ":types">
+		 |   <CONSTANTS: ":constants">
+		 |   <PREDICATES: ":predicates">
+		 |   <ACTION: ":action">
+		 |   <DURATIVE_ACTION: ":durative-action">
+		 |   <VARS: ":vars">
+		 |   <PARAMETERS: ":parameters">
+		 |   <COST: ":cost">
+
+		 /* Domain requirements */
+//		 |   <REQUIREMENT: ":strips" | ":typing" | ":negative-preconditions" |
+//		     ":disjunctive-preconditions" | ":equality" |
+//		      ":existential-preconditions" | ":universal-preconditions" |
+//		      ":quantified-preconditions" | ":conditional-effects" | ":fluents" | 
+//		      ":adl" | ":durative-actions" |
+//		      ":duration-inequalities" | ":continuous-effects">
+		 /* Domain requirements 
+		 |   <TYPING: ":typing">
+		 |   <STRIPS: ":strips">
+		 |   <EQUALITY: ":equality">
+		 |   <ADL: ":adl">		 
+		 |   <DURATIVE_ACTIONS: ":durative-actions">
+		 |   <DURATION_INEQUAL: ":duration-inequalities">
+		 |   <CONT_EFFECT: ":continuous-effects"> */
+
+		 /* Precondition-related terms */
+		 |   <CONDITION: ":condition">
+		 |   <PRECONDITION: ":precondition">
+
+		 /* Effect-related terms */
+		 |   <EFFECT: ":effect">
+		 |   <ASSIGN: "assign" | ":=">
+		 |   <SCALEUP: "scale-up" | "*=">
+		 |   <SCALEDOWN: "scale-down" | "/=">
+		 |   <INCREASE: "increase" | "+=">
+		 |   <DECREASE: "decrease" | "-=">
+
+		 /* Time-related terms */
+		 |   <DURATION: ":duration">
+		 |   <DURATION_VAR: "?duration">
+		 |   <AT: "at">
+		 |   <START: "start">
+		 |   <END: "end">
+		 |   <OVER: "over">
+		 |   <ALL: "all">
+		 |   <LOCALTIME: "#t">
+
+		 /* Logical relations */
+		 |   <AND: "and">
+		 |   <OR: "or">
+		 |   <NOT: "not">
+		 |   <FORALL: "forall">
+		 |   <WHEN:   "when">
+		 |   <EXISTS: "exists">
+		 |   <EITHER: "either">
+
+		 /* For PROBLEM files */
+		 |   <PROBLEM: "problem">
+		 |   <DOMAIN_TAG: ":domain">
+		 |   <OBJECT: ":objects">
+		 |   <GOAL: ":goal">
+		 |   <OPEN: ":open">
+		 |   <INIT: ":init">
+		 |   <METRIC: ":metric">
+		 |   <MAXIMIZE: "maximize">
+		 |   <MINIMIZE:	"minimize">
+		 /* |   <TOTAL_TIME: "total-time"> */
+		 |   <LENGTH: ":length">
+		 |   <SERIAL: ":serial">
+		 |   <PARALLEL: ":parallel">
+		 
+		 /* For GOALs in PSP */
+		 |	 <HARD: "hard">
+		 |	 <SOFT: "soft">
+		 
+		 /* updates */
+		 |   <UPDATE: ":update">
+		 |   <EVENT: ":events">
+		 |   <NOW: ":now">
+		 
+		 /* sleeper */
+		 |   <SENSE: "sense">
+}	    
+
+<DEFAULT> TOKEN: /* Literals */
+{
+    <A_NUMBER:
+	"0" | ["1"-"9"] (["0"-"9"])*
+	    | (["0"-"9"])+ "." (["0"-"9"])+
+	    | "-" ["1"-"9"] (["0"-"9"])*
+	    | "-" (["0"-"9"])+ "." (["0"-"9"])+ >
+
+//|   <ASSIGN_MATH: "+=" | "-=" | "*=" | "/=">
+|   <EQUAL: "=">
+|   <PLUS: "+">
+|   <MINUS: "-">
+|   <MUL: "*">
+|   <DIVIDE: "/">
+|   <COMPARISON: ">=" | "<=" | "==" | "<" | ">">
+|   <VAR: "?" ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","-","_","0"-"9"])* >
+|	<CUTVAR: "!" ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","-","_","0"-"9"])* >
+|   <NAME: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","-","_","0"-"9"])* >
+/* |   <REQUIREMENT: ":" (["a"-"z","A"-"Z"])+ > */
+|   <COMMA: ",">
+|	<OPENCURLYBRACKET: "{">
+|	<CLOSECURLYBRACKET: "}">
+|   <OPENBRACKET: "[">
+|   <CLOSEBRACKET: "]">
+
+}
+
+<DEFAULT, Requirement> TOKEN : {
+   <OPENBRACE: "("> : DEFAULT
+|   <CLOSEBRACE: ")"> : DEFAULT
+}
+
+//<Requirement> TOKEN://{//	<REQUIREMENT:(~["\t","\n","\r","\f"," ", ")", "("])+ > : Requirement//}
+<Requirement> TOKEN:
+{
+	<REQUIREMENT:(~[")", "("])+ > : Requirement
+}
+
+
+/*******************************************************************/
+void parse_domain_pddl() : {
+    ArrayList<Type> v = new ArrayList<Type>();
+    String n;
+    Type t,type=prob.obj;
+    
+    scope = prob;
+} {
+	<OPENBRACE> <DEFINE> 
+
+    DomainName()
+
+    (Requirements())?
+
+    ( <OPENBRACE> <TYPES> Types() <CLOSEBRACE> )?
+
+    ( <OPENBRACE> <CONSTANTS> TypedList() <CLOSEBRACE> )?
+
+	( <OPENBRACE> <PREDICATES> PredicateList() <CLOSEBRACE> )?
+
+	( <OPENBRACE> <FUNCTION> FunctionList() <CLOSEBRACE> )?
+
+    ActionList()
+
+    <CLOSEBRACE> 
+}
+
+
+
+void parse_problem_pddl() : {
+	String n;
+    ArrayList<String> v = new ArrayList<String>();
+	String type;
+
+	MathForm time;
+	MathForm m=null, mpenalty=null;
+    Predicate p;
+    Function f;
+    
+    float goalTime=Float.POSITIVE_INFINITY;
+    float penalty = 0;
+	boolean gIsHard=true;
+	boolean guIsConstant=true;
+	float util=0;
+	LiftedSet s;
+	
+    ArrayList<Predicate> pList = new ArrayList<Predicate>();
+    ArrayList<LiftedGoal> goals;
+    
+    scope = prob;
+} {
+	<OPENBRACE> <DEFINE> 
+
+    ProblemName()
+
+    <OPENBRACE> <DOMAIN_TAG> n=Name() <CLOSEBRACE> { prob.setDomainLink(n); }
+
+    ( <OPENBRACE> <OBJECT> TypedList() <CLOSEBRACE> )?
+
+    ( <OPENBRACE> <INIT>
+    	( 
+    		( p=Predicate() { prob.addInitialAdd(p);}
+    		| <OPENBRACE> <NOT> p=Predicate() <CLOSEBRACE> { prob.addInitialDelete(p); }
+			| <OPENBRACE> (<EQUAL>|<ASSIGN>) f=Function() m=MathForm() <CLOSEBRACE>
+				{ prob.addInitialSet(f,m); } 
+			| <OPENBRACE> <AT> time=MathForm()  
+	    		( p=Predicate() {prob.addInitialAdd(p, time);}
+	    		| <OPENBRACE> <NOT> p=Predicate() <CLOSEBRACE> { prob.addInitialDelete(p, time); } 
+	    		| s=getSet() {prob.addInitialSet(s,time);} 
+	    		)
+	    	  <CLOSEBRACE> 
+			) 
+		)* 
+ 	  <CLOSEBRACE> 
+ 	)?
+        /* PWS: moved <OPENBRACE> into (:goal ...)? below to allow problem
+         * files without goals
+	<OPENBRACE>
+	*/
+    (<OPENBRACE> goals=goals() {
+    	for (LiftedGoal g : goals) {
+    		prob.addGoal(g);
+    	}
+    }
+    <CLOSEBRACE>
+	)?
+	(OpenWorldKnowledge())?
+    (<OPENBRACE> <METRIC> (<MINIMIZE> | <MAXIMIZE>)
+		 m = MathForm() <CLOSEBRACE>)?
+    <CLOSEBRACE>
+}
+
+
+void OpenWorldKnowledge() : {
+//	ArrayList<Symbol<String>> uniVars = new ArrayList<Symbol<String>>();
+	ArrayList<Symbol<String>> uniVars = new ArrayList<Symbol<String>>();
+	ArrayList<Symbol<String>> existVars = new ArrayList<Symbol<String>>();
+	ArrayList<Predicate> knowledge = new ArrayList<Predicate>();
+	ArrayList<LiftedGoal> liftedGoals = null;
+	Predicate sp=null,p,g;
+} {
+    /* handle background knowledge */
+    <OPENBRACE> <OPEN>
+       (<OPENBRACE> <FORALL> uniVars=TypedList()
+        (<OPENBRACE> <SENSE> existVars=TypedList() sp=Predicate()
+        ((<OPENBRACE> <AND>)? (p=Predicate() { knowledge.add(p); })+ (<CLOSEBRACE>)?)? 
+        (<OPENBRACE> liftedGoals=goals() <CLOSEBRACE>)?
+        <CLOSEBRACE>)?
+        <CLOSEBRACE>
+       )*
+       { 
+       	  prob.addSensingRule((Variable)existVars.get(0), sp, knowledge, liftedGoals.get(0));
+       }
+      <CLOSEBRACE>
+}
+
+
+ArrayList<LiftedGoal> goals() : {
+	ArrayList<LiftedGoal> goals = new ArrayList<LiftedGoal>();
+	LiftedGoal g;
+} {
+	<GOAL> (<OPENBRACE> <AND>)?
+      (g=goal() { goals.add(g); })*      (<CLOSEBRACE>)? 
+      {
+      	return goals;
+      }
+}
+
+LiftedGoal goal() : {
+    float goalTime=Float.POSITIVE_INFINITY;
+    float penalty = 0;
+	boolean gIsHard=true;
+	boolean guIsConstant=true;
+	float util=0;
+	MathForm m=null, mpenalty=null;
+    Predicate p;
+
+	LiftedGoal g;
+}
+{
+	(   p=Predicate() {goalTime = Float.POSITIVE_INFINITY;}
+  		  ( <OPENBRACKET> ( util=Number() | m=MathForm() ) ( <COMMA> ( penalty=Number() | mpenalty=MathForm() ) )? <CLOSEBRACKET> )? 
+    	 ( <MINUS> { gIsHard=true; }
+    	 	 (<HARD> | <SOFT> {gIsHard=false;}) )? 
+		|<OPENBRACE> <AT> goalTime=Number() 
+			 p=Predicate()
+			 ( <OPENBRACKET> ( util=Number() | m=MathForm() ) ( <COMMA> ( penalty=Number() | mpenalty=MathForm() ) )? <CLOSEBRACKET> )? 
+    	 ( <MINUS> { gIsHard=true; }
+    	 	 (<HARD> | <SOFT> {gIsHard=false;}) )? 
+    	<CLOSEBRACE> )
+    	 {
+    	 	return new LiftedGoal(p,goalTime,gIsHard,guIsConstant,util,m,penalty,mpenalty);
+    	 }
+}
+
+Problem parse_update() : {
+	String n;
+    ArrayList<String> v = new ArrayList<String>();
+	String type;
+
+	MathForm time;
+	float currTime = 0.0f;
+	MathForm m=null, mpenalty=null;
+    Predicate p;
+    Function f;
+    float now;
+    float goalTime=Float.POSITIVE_INFINITY;
+	boolean gIsHard=true;
+	boolean guIsConstant=true;
+	float util=0;
+	float penalty=0;
+	float cost=0;
+	LiftedSet s;
+	
+    ArrayList<Predicate> pList = new ArrayList<Predicate>();
+    ArrayList<LiftedGoal> goals = null; // new ArrayList<LiftedGoal>();
+    scope = prob;
+} {
+	<OPENBRACE> <UPDATE>
+    ( <OBJECT> TypedList()
+	| <EVENT> 
+	   (  p=Predicate() { prob.addInitialAdd(p);}
+	   | <OPENBRACE> <NOT> p=Predicate() <CLOSEBRACE> { prob.addInitialDelete(p); }
+		| <OPENBRACE> (<EQUAL>|<ASSIGN>) f=Function() m=MathForm() <CLOSEBRACE>
+			{ prob.addInitialSet(f,m); } 
+		| <OPENBRACE> <AT> time=MathForm()  
+    		( p=Predicate() {prob.addInitialAdd(p, time);}
+    		| <OPENBRACE> <NOT> p=Predicate() <CLOSEBRACE> { prob.addInitialDelete(p, time); } 
+    		| s=getSet() {prob.addInitialSet(s,time);} 
+    		)
+    	  <CLOSEBRACE> 
+		)*
+	| goals=goals() {
+		for (LiftedGoal g : goals) {
+			prob.addGoal(g);
+		}
+	}
+	|   OpenWorldKnowledge()
+    |	<COST> cost=Number()
+	|	<NOW> now=Number() 
+	  ( <OPENBRACE>  { prob.clearInit();}
+  	   (  p=Predicate() { prob.addInitialAdd(p);}
+		| <OPENBRACE> (<EQUAL>|<ASSIGN>) f=Function() m=MathForm() <CLOSEBRACE>
+			{ prob.addInitialSet(f,m); } 
+		| <OPENBRACE> <AT> time=MathForm()  
+    		( p=Predicate() {prob.addInitialAdd(p, time);}
+    		| <OPENBRACE> <NOT> p=Predicate() <CLOSEBRACE> { prob.addInitialDelete(p, time); } 
+    		| s=getSet() {prob.addInitialSet(s,time);} 
+    		)
+    	  <CLOSEBRACE> 
+		)* <CLOSEBRACE>
+	  )?
+      {	//System.out.println("Printing from Parser, value of now: " + now);
+      	prob.initAction.setDuration(now);
+      	prob.initAction.setCost(new MathForm(cost));
+      }
+    )*  
+    <CLOSEBRACE>
+    {return prob;}    
+    
+	| <EOF>	{		prob.name = null;		return prob;	}
+}
+
+
+void DomainName() : {String n;} {
+    <OPENBRACE> <DOMAIN> n=Name() <CLOSEBRACE>
+    	{prob.setDomainName(n);}
+}
+
+
+
+void ProblemName() : {} {
+    <OPENBRACE> <PROBLEM> prob.name=Name() <CLOSEBRACE>
+}
+
+
+
+void Requirements() : {
+    Token t;
+    prob.requirements = new ArrayList<String>(10);
+} {
+    <OPENBRACE>  <REQUIREMENTS>
+    	( t=<REQUIREMENT> {prob.requirements.add(t.image);}
+     	)*
+    <CLOSEBRACE>
+}
+
+
+Type Type() : {
+	Type type; 
+	String n;
+	ArrayList<Type> types;
+	StringBuilder buf;
+} {
+	( n=Name() { type = scope.putType(new Type(n)); }
+	| <OPENBRACE> <EITHER> { 
+			buf = new StringBuilder(50);
+			types = new ArrayList<Type>(); 
+		}
+		(
+	  		n=Name() {
+				types.add(scope.putType(new Type(n))); 
+				buf.append('*').append(n);}
+	  	)+
+	  <CLOSEBRACE> {
+	  		if (types.size() == 0)
+	  			type = prob.obj;
+			else if (types.size() == 1)
+				type = types.get(0);
+	  		else {
+	  			type = prob.putType(new Type(buf.toString()));
+	  			type.subTypes.addAll(types);
+  			}
+ 		}
+	)
+	{return type;}
+}
+
+void Types() : {
+	Type t;
+	ArrayList<Type> temp = new ArrayList<Type>();
+	Type type=prob.obj;
+} {
+	(
+		(  t=Type() {temp.add(t);}  )+
+		(  <MINUS> type=Type()  )?   { 
+//			type.subTypes.addAll(temp);
+			type.addAll(temp);
+			temp.clear(); 
+			type=prob.obj; 
+		}
+	)*
+}
+
+// For supporting ! cut operator rules
+
+/*ArrayList<Symbol<String>> UniTypedList() : {
+	Symbol<String> arg;
+	ArrayList<Symbol<String>> temp = new ArrayList<Symbol<String>>();
+	ArrayList<Symbol<String>> args = new ArrayList<Symbol<String>>();	
+	Type type=prob.obj;
+} {
+	(
+		(  arg=UniSymbol() {temp.add(arg);}  )+
+		(  <MINUS> type=Type()  )?   { 
+			type.addAll(temp);
+			args.addAll(temp);
+			temp.clear(); 
+			type=prob.obj; 
+		}
+	)*
+	{return args;}
+}*/
+
+
+ArrayList<Symbol<String>> TypedList() : {
+	Symbol<String> arg;
+	ArrayList<Symbol<String>> temp = new ArrayList<Symbol<String>>();
+	ArrayList<Symbol<String>> args = new ArrayList<Symbol<String>>();	
+	Type type=prob.obj;
+} {
+	(
+		(  arg=Symbol() {temp.add(arg);}  )+
+		(  <MINUS> type=Type()  )?   { 
+			type.addAll(temp);
+			args.addAll(temp);
+			temp.clear(); 
+			type=prob.obj; 
+		}
+	)*
+	{return args;}
+}
+
+Term Term() : {
+	Term term;
+	ArrayList<Symbol<String>> args;
+} {
+	term=singletonTerm()
+	args=TypedList() {
+		term.addAll(args);
+		return term;
+	}
+}
+
+Term singletonTerm() : {String n;} {
+	n=Name() {return new Term(n);}
+}
+
+Predicate Predicate() : {
+	Term t;
+	Predicate p;
+} {
+    <OPENBRACE> t=Term() <CLOSEBRACE>
+    {scope.putPredicate(p = new Predicate(t)); return p;}    
+}
+
+Function Function() : {
+	Term t;
+	Function f;
+} {
+	<OPENBRACE> t=Term() <CLOSEBRACE>
+	{ scope.putFunction(f = new Function(t)); return f;}
+}
+
+// grrr.... zenotravel
+Function BrokenFunction() : {Term t; Function f;}{
+	t=singletonTerm() { scope.putFunction(f = new Function(t)); return f;}
+}
+
+void PredicateList() : {} {
+    (Predicate())*
+}
+
+void FunctionList() : {} {
+    (Function())*
+}
+
+void ActionList() : {} {
+    (Action())*
+}
+
+void Action() : {} {    
+    <OPENBRACE> 
+    ( <ACTION> InstantAct() 
+    | <DURATIVE_ACTION> DurativeAct())
+    <CLOSEBRACE> 
+}
+
+
+void Condition() : { MathForm time; LiftedTest te; Predicate p;  } {
+    ( ObjEqualityCheck() 
+    | <OPENBRACE> 
+    	( <AT> 
+    		( <START> {time = MathForm.zero;}
+    		| <END> {time = MathForm.dur;}
+    		| time=MathForm() )
+    		( te=getTest() {act.putTest(te, time);} 
+    		| p=Predicate() {act.putCondition(p, time);})
+		| <OVER> <ALL>
+    		( te=getTest() {act.putTest(te, MathForm.zero);} 
+    		| p=Predicate() {act.putProtectCondition(p);})
+		)
+      <CLOSEBRACE>
+      )
+}
+
+void AllConditions() : {} {
+	( <OPENBRACE> <AND> (Condition())* <CLOSEBRACE>
+	| (Condition())?)
+}
+
+void Effect() : {MathForm time; LiftedSet se; Predicate p; } {	
+    (   <OPENBRACE> <AT> 
+		( <START> {time = MathForm.zero;}
+		| <END> {time = MathForm.dur;}
+		| time=MathForm() )
+		( se=getSet() { act.putSet(se,time); }
+		| <OPENBRACE> <NOT> p=Predicate() <CLOSEBRACE> {act.putDelete(p,time);} 
+		| p = Predicate() { act.putAdd(p,time); })
+      <CLOSEBRACE>)
+}
+
+void AllEffects() : {} {
+	( <OPENBRACE> <AND> (Effect())* <CLOSEBRACE>
+	| (Effect())?)
+}
+
+Action DurativeAct() : {
+    String n;
+    MathForm mf;
+    Predicate p;
+    LiftedTest te;
+    LiftedSet se;
+    MathForm time;
+} {
+    n=Name() { 
+    	scope = act = scope.putAction(new Action(n));
+    	act.inTheMidstOfDeclaringThingsThatThisActionConditionsUpon = true;
+    }
+
+    (	<PARAMETERS> <OPENBRACE> TypedList() <CLOSEBRACE>	)?
+
+	(<DURATION> <OPENBRACE> <EQUAL> <DURATION_VAR> mf=MathForm()
+    	{act.setDuration(mf);}
+    	<CLOSEBRACE>
+    )?
+
+    (<COST> mf=MathForm() {act.setCost(mf);})?
+
+// note that we don't handle over all tests very well
+    <CONDITION> AllConditions()
+
+	{act.inTheMidstOfDeclaringThingsThatThisActionConditionsUpon= false;}
+    <EFFECT> AllEffects()
+
+    { scope = act.outerScope; return act; }
+}
+
+void ICondition() : { LiftedTest te; Predicate p;  } {
+    ( ObjEqualityCheck() 
+    	| te=getTest() {act.putTest(te);} 
+    	| p=Predicate() {act.putCondition(p);}
+	)
+}
+
+void AllIConditions() : {} {
+	( <OPENBRACE> <AND> (ICondition())* <CLOSEBRACE>
+	| (ICondition())?)
+}
+
+void IEffect() : {LiftedSet se; Predicate p; } {	
+    ( se=getSet() { act.putSet(se); }
+	| <OPENBRACE> <NOT> p=Predicate() <CLOSEBRACE> {act.putDelete(p);} 
+	| p = Predicate() { act.putAdd(p); }
+    )
+}
+
+void AllIEffects() : {} {
+	( <OPENBRACE> <AND> (IEffect())* <CLOSEBRACE>
+	| (IEffect())?)
+}
+
+/*** Instantaneous Actions **/
+Action InstantAct() : {
+    String n;
+    MathForm m;
+} {
+    n=Name() { scope = act = scope.putAction(new Action(n)); 
+    			act.inTheMidstOfDeclaringThingsThatThisActionConditionsUpon = true; }
+
+    (<PARAMETERS> <OPENBRACE> TypedList() <CLOSEBRACE> )?
+
+    (<COST> m=MathForm() {act.setCost(m);})?
+
+    <PRECONDITION>
+    AllIConditions()
+
+	{act.inTheMidstOfDeclaringThingsThatThisActionConditionsUpon = false;}
+    <EFFECT>
+    AllIEffects()
+    
+    { scope = act.outerScope; return act; }
+}
+
+
+
+String Comparison() : {Token t;} {
+	( t=<COMPARISON> {return t.image;}
+	| t=<EQUAL> {return "==";}
+	)
+}
+
+String Assignment() : {Token t;} {
+	( t=<ASSIGN> {return "=";}
+	| t=<EQUAL> {return "=";}
+	| <INCREASE> {return "+=";}
+	| <DECREASE> {return "-=";}
+	| <SCALEUP> {return "*=";}
+	| <SCALEDOWN> {return "/=";}
+    )  
+}
+
+char Operator() : {Token t;} {
+    (t=<PLUS> | t=<MINUS> | t=<MUL> | t=<DIVIDE>) 
+    {return t.image.charAt(0);}
+}
+
+	
+LiftedTest getTest() : {
+    String op;
+    MathForm l;
+    MathForm r;
+} {
+	<OPENBRACE>
+    op=Comparison() 
+    l=MathForm()
+    r=MathForm()
+    <CLOSEBRACE>
+
+	{return new LiftedTest(op,l,r);}
+}
+
+
+LiftedSet getSet() : {
+    String op;
+    Function f;
+    MathForm r;
+} {
+	<OPENBRACE>
+	op=Assignment()
+	(f=Function() | f=BrokenFunction())
+	r=MathForm()
+	<CLOSEBRACE>
+	
+	{ return new LiftedSet(op,f,r);}
+}
+
+// shouldn't the second clause use parentheses?
+MathForm MathForm() : {
+    char op;
+    MathForm mf;
+    Function f;
+    MathForm l, r;
+    boolean track = act.inTheMidstOfDeclaringThingsThatThisActionConditionsUpon;
+    act.inTheMidstOfDeclaringThingsThatThisActionConditionsUpon = true;
+} {
+	( mf=PrimaryMF() { 
+		act.inTheMidstOfDeclaringThingsThatThisActionConditionsUpon=track;
+		return mf; 
+		}
+	| op=Operator() 
+      l=MathForm()  
+      r=MathForm() { 
+    	act.inTheMidstOfDeclaringThingsThatThisActionConditionsUpon=track; 
+    	return new MathForm(op,l,r); 
+	  }
+	)
+}
+
+
+MathForm PrimaryMF() : {
+    MathForm m;
+    Function f;
+    float v;
+} {
+	( v=Number() { return new MathForm(v);}
+	| f=Function() { return new MathForm(f);}
+	| <OPENBRACE> m=MathForm() <CLOSEBRACE> { return m; }
+	| <DURATION_VAR> { return MathForm.dur; }
+	)
+}
+
+
+void ObjEqualityCheck() : { }
+{
+     <OPENBRACE> <NOT> <OPENBRACE>
+     <EQUAL> (<VAR>)+ <CLOSEBRACE> <CLOSEBRACE>
+}
+
+
+
+float Number() : { Token t; } {
+	t=<A_NUMBER> {return Float.valueOf(t.image);}
+}
+
+
+String Name() : {Token t;} {
+	(t=<NAME> | t=<AT> | t=<VAR>) 
+	{return t.image.toLowerCase();}
+}
+
+/*Symbol<String> UniSymbol() : {Token t;} {
+	(t=<NAME> | t=<AT>) {
+		return scope.putConstant(new Constant(token.image.toLowerCase()));
+	}
+|	(t=<VAR>) {
+		return scope.putVariable(new Variable(token.image.toLowerCase()));
+	}
+|	(t=<CUTVAR>) {
+		return scope.putVariable(new Variable(token.image.toLowerCase(), true));
+	}
+}*/
+
+Symbol<String> Symbol() : {Token t;} {
+	(t=<NAME> | t=<AT>) {
+		return scope.putConstant(new Constant(token.image.toLowerCase()));
+	}
+|	t=<VAR> {
+		return scope.putVariable(new Variable(token.image.toLowerCase()));		
+	}
+|	(t=<CUTVAR>) {
+		//System.out.println("\n Was at cutVar Processing \n");
+		return scope.putVariable(new Variable(token.image.toLowerCase(), true));		
+	}
+
+}
